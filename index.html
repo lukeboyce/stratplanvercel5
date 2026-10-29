@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Track NYC Emergency Management's progress on the goals, objectives, and tactics in the 2026–2029 Strategic Plan.">
+<title>NYCEM Strategic Plan Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600&display=swap">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; }
+[hidden] { display: none !important; }
+/* Layout: single civic reading column (mockup order): title, intro, tracker, then each goal with its objectives and tactic rows. */
+:root {
+  --bg: #ffffff;
+  --surface: #f4f5f8;
+  --line: #dfe2ea;
+  --fg: #1b1d24;
+  --muted: #5c6373;
+  --title: #155a9c;
+  --goal: #0d1f7c;
+  --sub: #6d7484;
+  --s-done: #0b7a3e;
+  --s-prog: #c9a100;
+  --s-pause: #0a1a78;
+  --s-not: #c94e05;
+  --on-status: #ffffff;
+  --on-prog: #1b1d24;
+  --edit: #155a9c;
+  --edit-bg: #e8f0fa;
+  --font: "Public Sans", "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12141a; --surface: #1b1e27; --line: #2c3140; --fg: #e8eaf0; --muted: #a3a9b8;
+    --title: #7db4ea; --goal: #a9b6ff; --sub: #9aa1b1;
+    --s-done: #1f9a57; --s-prog: #d9b21e; --s-pause: #4a5bd6; --s-not: #e0661c;
+    --on-status: #ffffff; --on-prog: #15161b; --edit: #7db4ea; --edit-bg: #1a2638;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12141a; --surface: #1b1e27; --line: #2c3140; --fg: #e8eaf0; --muted: #a3a9b8;
+  --title: #7db4ea; --goal: #a9b6ff; --sub: #9aa1b1;
+  --s-done: #1f9a57; --s-prog: #d9b21e; --s-pause: #4a5bd6; --s-not: #e0661c;
+  --on-status: #ffffff; --on-prog: #15161b; --edit: #7db4ea; --edit-bg: #1a2638;
+  color-scheme: dark;
+}
+body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 900px; margin: 0 auto; padding-block: 40px 120px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+h1 { color: var(--title); font-size: clamp(28px, 5vw, 36px); font-weight: 700; letter-spacing: -0.01em; line-height: 1.15; }
+.subtitle { color: var(--title); font-size: clamp(18px, 3vw, 22px); font-weight: 700; margin-top: 6px; }
+.intro { margin-top: 28px; display: grid; gap: 14px; max-width: 68ch; }
+.intro p { margin: 0; }
+.updated { margin-top: 14px; color: var(--muted); font-size: 13px; }
+
+.section-title { color: var(--title); font-size: 21px; font-weight: 700; margin-top: 44px; }
+.tracker { margin-top: 18px; display: grid; gap: 22px; }
+.tracker-top { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-end; justify-content: space-between; }
+.total .num { color: var(--title); font-size: clamp(56px, 10vw, 76px); font-weight: 800; line-height: 0.95; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.total .lbl { font-weight: 700; font-size: 13px; margin-top: 6px; }
+.tiles { display: flex; flex-wrap: wrap; gap: 14px; }
+.tile { display: grid; justify-items: center; gap: 6px; width: 76px; }
+.tile .sq { width: 70px; height: 70px; border-radius: 18px; display: grid; place-items: center; color: var(--on-status); font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.tile .lbl { font-size: 11px; font-weight: 700; text-align: center; white-space: nowrap; }
+.bar { display: flex; height: 42px; border-radius: 21px; overflow: hidden; background: var(--surface); }
+.bar .seg { display: grid; place-items: center; color: var(--on-status); font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; min-width: 0; overflow: hidden; transition: flex-basis .4s ease; }
+.notice { font-size: 13px; color: var(--muted); border-left: 3px solid var(--line); padding: 2px 0 2px 12px; max-width: 68ch; }
+
+.jump { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.jump button { font: inherit; font-size: 13px; font-weight: 600; color: var(--goal); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+.jump button:hover { background: var(--surface); }
+
+.goal { margin-top: 64px; scroll-margin-top: 24px; }
+.goal h2 { color: var(--goal); font-size: 24px; font-weight: 700; }
+.goal .tagline { color: var(--sub); font-style: italic; font-weight: 600; font-size: 17px; margin-top: 8px; }
+.goal-stats { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-top: 14px; font-size: 13px; color: var(--muted); }
+.mini { display: flex; width: 160px; height: 8px; border-radius: 4px; overflow: hidden; background: var(--surface); }
+.means { margin-top: 22px; }
+.means-label { font-size: 15px; }
+.means-label b { font-weight: 700; }
+.means ul { margin: 12px 0 0; padding-left: 22px; display: grid; gap: 4px; max-width: 75ch; }
+.how { color: var(--sub); font-weight: 700; font-size: 17px; margin-top: 30px; }
+.objective { margin-top: 22px; }
+.objective h3 { font-size: 16px; font-weight: 700; color: var(--fg); display: flex; gap: 10px; }
+.objective h3 .n { color: var(--goal); font-variant-numeric: tabular-nums; }
+.objective .desc { margin: 4px 0 0; color: var(--muted); max-width: 72ch; padding-left: 26px; }
+.tactics { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 10px; }
+.tactic { display: flex; align-items: center; gap: 16px; justify-content: space-between; background: var(--surface); border: 1px solid var(--line); border-radius: 22px; padding: 9px 10px 9px 20px; }
+.tactic .t { min-width: 0; font-size: 14.5px; }
+.pill { flex: none; width: 150px; text-align: center; border-radius: 999px; padding: 3px 10px; font-size: 13.5px; font-weight: 600; color: var(--on-status); }
+.st-Completed { background: var(--s-done); }
+.st-InProgress { background: var(--s-prog); color: var(--on-prog); }
+.st-Paused { background: var(--s-pause); }
+.st-NotStarted { background: var(--s-not); }
+.empty-tactics { color: var(--muted); font-size: 14px; font-style: italic; padding-left: 26px; margin-top: 8px; }
+
+/* editor */
+.editbar-top { display: none; }
+body.editing .editbar-top { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; background: var(--edit-bg); color: var(--fg); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; margin-bottom: 28px; font-size: 14px; }
+.editbar-top b { color: var(--edit); }
+select.status { font: inherit; font-size: 13.5px; font-weight: 600; width: 150px; flex: none; border-radius: 999px; border: 2px solid transparent; padding: 3px 10px; color: var(--on-status); cursor: pointer; appearance: none; text-align: center; text-align-last: center; }
+select.status.st-InProgress { color: var(--on-prog); }
+select.status option { color: var(--fg); background: var(--bg); }
+.tactic.changed { border-color: var(--edit); box-shadow: 0 0 0 1px var(--edit) inset; }
+.tray { position: fixed; left: 0; right: 0; bottom: 0; background: var(--bg); border-top: 1px solid var(--line); padding-block: 12px calc(12px + env(safe-area-inset-bottom, 0px)); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); z-index: 5; }
+.tray-inner { max-width: 900px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; }
+.tray .msg { font-size: 14px; min-width: 0; }
+.tray .btns { display: flex; gap: 10px; }
+.btn { font: inherit; font-size: 14px; font-weight: 600; border-radius: 8px; padding: 9px 16px; cursor: pointer; border: 1px solid var(--line); background: var(--bg); color: var(--fg); }
+.btn.primary { background: var(--edit); border-color: var(--edit); color: var(--bg); }
+.btn:disabled { opacity: .5; cursor: default; }
+.btn:focus-visible, .jump button:focus-visible, select.status:focus-visible, a:focus-visible { outline: 3px solid var(--edit); outline-offset: 2px; }
+.gate { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-bottom: 28px; max-width: 68ch; }
+.gate h2 { font-size: 18px; color: var(--goal); }
+.gate p { margin: 8px 0 0; }
+.login { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; align-items: flex-end; }
+.login label { display: grid; gap: 4px; font-size: 13px; font-weight: 600; }
+.login input { font: inherit; font-size: 15px; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); min-width: 0; width: 260px; max-width: 100%; }
+.login input:focus-visible { outline: 3px solid var(--edit); outline-offset: 1px; }
+.err { color: var(--s-not); font-weight: 600; }
+.linkbtn { font: inherit; background: none; border: 0; padding: 0; color: var(--edit); text-decoration: underline; cursor: pointer; }
+footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between; font-size: 13px; color: var(--muted); }
+footer a { color: var(--muted); }
+.loading { color: var(--muted); margin-top: 40px; }
+@media (max-width: 560px) {
+  .tactic { flex-direction: column; align-items: stretch; gap: 8px; border-radius: 16px; padding: 12px 14px; }
+  .pill, select.status { width: auto; align-self: flex-start; padding-inline: 14px; }
+  .tracker-top { align-items: flex-start; }
+  .objective .desc, .empty-tactics { padding-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .bar .seg { transition: none; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="editbar-top" id="editTop">
+    <span><b>Editor view.</b> Change a tactic's status, then publish to update the public page.</span>
+    <span style="display:flex;gap:16px;flex-wrap:wrap"><a href="/" id="exitEdit">Back to public view</a><button type="button" class="linkbtn" id="signOut">Sign out</button></span>
+  </div>
+  <div class="gate" id="gate" hidden></div>
+  <main id="app"><p class="loading">Loading the Strategic Plan tracker…</p></main>
+  <footer>
+    <span id="foot-updated"></span>
+    <a href="/admin" id="staffLink">Staff sign-in</a>
+  </footer>
+</div>
+<div class="tray" id="tray" hidden>
+  <div class="tray-inner">
+    <span class="msg" id="trayMsg" role="status" aria-live="polite"></span>
+    <span class="btns">
+      <button class="btn" id="discardBtn" type="button">Discard</button>
+      <button class="btn primary" id="publishBtn" type="button">Publish updates</button>
+    </span>
+  </div>
+</div>
+
+<script>
+const STATUSES = ["Completed", "In Progress", "Paused", "Not Started"];
+const COLOR = { "Completed": "--s-done", "In Progress": "--s-prog", "Paused": "--s-pause", "Not Started": "--s-not" };
+const cls = s => "st-" + s.replace(/\s/g, "");
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+let plan = null;          // last published data
+let pending = {};         // tactic id -> new status (editor only)
+let editing = false;
+let canWrite = false;
+
+/* ---- API -------------------------------------------------------------- */
+async function api(path, opts = {}) {
+  const r = await fetch(path, { credentials: "same-origin", headers: { "Content-Type": "application/json" }, ...opts });
+  let data = {}; try { data = await r.json(); } catch (e) {}
+  if (!r.ok) throw { status: r.status, message: data.error || "The server didn't respond." };
+  return data;
+}
+async function checkEditorAccess() {
+  try { return await api("/api/session"); } catch (e) { return { editor: false, configured: false, offline: true }; }
+}
+async function saveStatuses(changes) {
+  return api("/api/plan", { method: "PUT", body: JSON.stringify({ changes }) });
+}
+
+function allTactics(p) { return p.goals.flatMap(g => g.objectives.flatMap(o => o.tactics)); }
+function statusOf(t) { return (editing && pending[t.id]) || t.status; }
+function counts(list) {
+  const c = Object.fromEntries(STATUSES.map(s => [s, 0]));
+  list.forEach(t => c[statusOf(t)]++);
+  return c;
+}
+function pct(n, total) { return total ? Math.round((n / total) * 100) : 0; }
+/* Largest-remainder rounding so the bar's labels always add up to 100%. */
+function pcts(c, total) {
+  const out = {}; if (!total) { STATUSES.forEach(s => out[s] = 0); return out; }
+  const raw = STATUSES.map(s => [s, (c[s] / total) * 100]);
+  raw.forEach(([s, v]) => out[s] = Math.floor(v));
+  let left = 100 - Object.values(out).reduce((a, b) => a + b, 0);
+  raw.filter(([s]) => c[s] > 0).sort((a, b) => (b[1] % 1) - (a[1] % 1)).forEach(([s]) => { if (left > 0) { out[s]++; left--; } });
+  return out;
+}
+function fmtDate(iso) {
+  const d = new Date(iso + "T12:00:00");
+  return d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+}
+
+function segs(c, total, labels) {
+  const P = pcts(c, total);
+  return STATUSES.filter(s => c[s] > 0).map(s => {
+    const p = P[s];
+    const fg = s === "In Progress" ? "var(--on-prog)" : "var(--on-status)";
+    return `<div class="seg" style="flex:${c[s]} 1 0;background:var(${COLOR[s]});color:${fg}" title="${s}: ${c[s]} (${p}%)">${labels && p >= 7 ? p + "%" : ""}</div>`;
+  }).join("");
+}
+
+function tacticRow(t) {
+  const s = statusOf(t);
+  const changed = editing && pending[t.id] !== undefined;
+  const control = editing
+    ? `<select class="status ${cls(s)}" id="st-${esc(t.id)}" data-id="${esc(t.id)}" aria-label="Status for: ${esc(t.title)}">${STATUSES.map(o => `<option${o === s ? " selected" : ""}>${o}</option>`).join("")}</select>`
+    : `<span class="pill ${cls(s)}">${s}</span>`;
+  return `<li class="tactic${changed ? " changed" : ""}"><span class="t">${esc(t.title)}</span>${control}</li>`;
+}
+
+function render() {
+  const tactics = allTactics(plan);
+  const total = tactics.length;
+  const c = counts(tactics);
+  const anyPlaceholder = tactics.some(t => t.placeholder);
+
+  const goalsHtml = plan.goals.map(g => {
+    const gt = g.objectives.flatMap(o => o.tactics);
+    const gc = counts(gt);
+    const label = g.meansLabel.replace(/^What (.+) Means for New Yorkers$/, (m, name) => `What <b>${esc(name)}</b> Means for New Yorkers`);
+    return `<section class="goal" id="goal-${g.id}">
+      <h2>Goal ${g.id}: ${esc(g.title)}</h2>
+      <div class="tagline">${esc(g.subtitle)}</div>
+      <div class="goal-stats"><div class="mini" aria-hidden="true">${segs(gc, gt.length, false)}</div>
+        <span>${gt.length} tactics · ${gc["Completed"]} completed · ${gc["In Progress"]} in progress</span></div>
+      <div class="means"><div class="means-label">${label}</div>
+        <ul>${g.bullets.map(b => `<li>${esc(b)}</li>`).join("")}</ul></div>
+      <div class="how">How We Will Get There</div>
+      ${g.objectives.map(o => {
+        const n = o.id.split(".")[1];
+        return `<div class="objective"><h3><span class="n">${n}.</span><span>${esc(o.title)}</span></h3>
+          <p class="desc">${esc(o.description)}</p>
+          ${o.tactics.length ? `<ul class="tactics">${o.tactics.map(tacticRow).join("")}</ul>` : `<p class="empty-tactics">Tactics for this objective are in development.</p>`}
+        </div>`;
+      }).join("")}
+    </section>`;
+  }).join("");
+
+  document.getElementById("app").innerHTML = `
+    <h1>${esc(plan.title)}</h1>
+    <div class="subtitle">${esc(plan.subtitle)}</div>
+    <div class="intro">${plan.intro.map(p => `<p>${esc(p)}</p>`).join("")}</div>
+    <div class="updated">Last updated ${fmtDate(plan.lastUpdated)}</div>
+    <h2 class="section-title">Tactic Tracker</h2>
+    <div class="tracker">
+      <div class="tracker-top">
+        <div class="total"><div class="num">${total}</div><div class="lbl">Total Tactics</div></div>
+        <div class="tiles">${STATUSES.map(s => `<div class="tile"><div class="sq" style="background:var(${COLOR[s]});${s === "In Progress" ? "color:var(--on-prog)" : ""}">${c[s]}</div><div class="lbl">${s}</div></div>`).join("")}</div>
+      </div>
+      <div class="bar" role="img" aria-label="${(P => STATUSES.map(s => `${s} ${P[s]}%`).join(", "))(pcts(c, total))}">${segs(c, total, true)}</div>
+      ${anyPlaceholder ? `<p class="notice">Tactics shown are placeholders while NYCEM finalizes them. Goals and objectives reflect the adopted plan.</p>` : ""}
+      <div class="jump" aria-label="Jump to a goal">${plan.goals.map(g => `<button type="button" data-goal="${g.id}">Goal ${g.id}: ${esc(g.title)}</button>`).join("")}</div>
+    </div>
+    ${goalsHtml}`;
+  document.getElementById("foot-updated").textContent = "NYC Emergency Management · Last updated " + fmtDate(plan.lastUpdated);
+  renderTray();
+}
+
+function renderTray(message) {
+  const tray = document.getElementById("tray");
+  tray.hidden = !editing;
+  if (!editing) return;
+  const n = Object.keys(pending).length;
+  document.getElementById("trayMsg").textContent = message || (n ? `${n} unpublished change${n > 1 ? "s" : ""}` : "No changes yet");
+  document.getElementById("publishBtn").disabled = !n || !canWrite;
+  document.getElementById("discardBtn").disabled = !n;
+}
+
+
+function showGate(html) { const g = document.getElementById("gate"); g.innerHTML = html; g.hidden = !html; }
+
+const isAdminPath = () => location.pathname.replace(/\/$/, "") === "/admin" || location.hash === "#edit";
+
+function loginForm(msg) {
+  showGate(`<h2>Staff sign-in</h2><p>Sign in to update tactic statuses on the public tracker.</p>
+    <form class="login" id="loginForm"><label for="pw">Editor password<input id="pw" type="password" autocomplete="current-password" required></label>
+    <button class="btn primary" type="submit">Sign in</button></form>
+    ${msg ? `<p class="err" role="alert">${esc(msg)}</p>` : ""}<p><a href="/">Return to the public tracker</a></p>`);
+  document.getElementById("pw").focus();
+  document.getElementById("loginForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    try { await api("/api/session", { method: "POST", body: JSON.stringify({ password: document.getElementById("pw").value }) }); setMode(); }
+    catch (err) { loginForm(err.message); }
+  });
+}
+
+async function setMode() {
+  if (!isAdminPath()) {
+    editing = false; document.body.classList.remove("editing"); showGate(""); render();
+    return;
+  }
+  document.getElementById("staffLink").hidden = true;
+  showGate(`<p>Checking sign-in…</p>`);
+  const s = await checkEditorAccess();
+  if (s.offline) { showGate(`<h2>Editor unavailable</h2><p>The editor needs the site's server, which isn't reachable. If you opened this file directly, run it with <code>node dev.js</code> or deploy it to Vercel.</p>`); render(); return; }
+  if (!s.configured) { showGate(`<h2>Editor not set up</h2><p>Add an <code>ADMIN_PASSWORD</code> environment variable in Vercel, then redeploy. The README has the steps.</p>`); render(); return; }
+  if (!s.editor) { editing = false; document.body.classList.remove("editing"); render(); loginForm(); return; }
+  canWrite = true; editing = true; document.body.classList.add("editing");
+  showGate(s.database ? "" : `<h2>Saving isn't set up yet</h2><p>You're signed in, but no database is connected, so updates can't be saved. Connect Upstash Redis in Vercel (see README), then redeploy.</p>`);
+  if (!s.database) canWrite = false;
+  render();
+}
+
+document.addEventListener("change", e => {
+  const sel = e.target.closest("select.status");
+  if (!sel) return;
+  const t = allTactics(plan).find(x => x.id === sel.dataset.id);
+  if (sel.value === t.status) delete pending[t.id]; else pending[t.id] = sel.value;
+  const y = window.scrollY; render(); window.scrollTo(0, y);
+  document.getElementById("st-" + t.id)?.focus();
+});
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-goal]");
+  if (b) document.getElementById("goal-" + b.dataset.goal)?.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+});
+document.getElementById("discardBtn").addEventListener("click", () => { pending = {}; render(); });
+document.getElementById("publishBtn").addEventListener("click", async () => {
+  const btn = document.getElementById("publishBtn");
+  renderTray("Publishing…"); btn.disabled = true;
+  try {
+    const out = await saveStatuses(pending);
+    plan = out.plan; const n = Object.keys(pending).length; pending = {};
+    render(); renderTray(`Published ${n} change${n > 1 ? "s" : ""}. The public page is up to date.`);
+  } catch (err) {
+    if (err.status === 401) { editing = false; document.body.classList.remove("editing"); render(); loginForm("Your session expired. Sign in again; your unpublished changes are still selected."); editing = true; return; }
+    renderTray(err.message || "The update didn't go through. Publish again."); btn.disabled = false;
+  }
+});
+document.getElementById("signOut").addEventListener("click", async () => {
+  if (Object.keys(pending).length) { renderTray("Publish or discard your changes before signing out."); return; }
+  try { await api("/api/session", { method: "DELETE" }); } catch (e) {}
+  location.href = "/";
+});
+document.getElementById("exitEdit").addEventListener("click", e => {
+  if (Object.keys(pending).length) { e.preventDefault(); renderTray("Publish or discard your changes before leaving the editor."); return; }
+});
+
+fetch("/api/plan", { cache: "no-store" })
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(p => { plan = p; setMode(); })
+  .catch(() => { document.getElementById("app").innerHTML = `<p class="loading">The tracker data couldn't load. Refresh the page to try again.</p>`; });
+</script>
+</body>
+</html>

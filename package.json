@@ -1,0 +1,11 @@
+{
+  "name": "nycem-strategic-plan-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Public progress tracker for the NYCEM 2026-2029 Strategic Plan with a password-protected editor.",
+  "scripts": {
+    "dev": "node dev.js"
+  },
+  "engines": { "node": ">=20" }
+}
